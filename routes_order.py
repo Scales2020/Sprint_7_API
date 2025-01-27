@@ -4,7 +4,7 @@ from constants import Constants
 
 class APIOrder:
     def create_new_order(data):
-        return requests.post('https://qa-scooter.praktikum-services.ru/api/v1/orders', data=data)
+        return requests.post(f'{Constants.O_URL}', data=data)
 
     def get_list_of_10_orders(params):
         return requests.get(f'{Constants.O_URL}?limit=10&page=0', params=params)

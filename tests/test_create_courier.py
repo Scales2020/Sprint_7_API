@@ -5,31 +5,13 @@ from user_data import NewData
 
 
 class TestCourier:
-    @allure.title('Проверка, что курьера можно создать')
+    @allure.title('Проверка, что курьера можно создать: возвращается правильный код (201) и тело ответа (ok:true)')
     def test_new_courier_created(self):
         new_courier_data = TestData.generate_new_courier_data(self)
         new_courier = APIHelp.create_courier(new_courier_data)
         assert new_courier.status_code == 201
-        courier_id = APIHelp.get_courier_id({"login": new_courier_data["login"], "password": new_courier_data["password"]})
-        APIHelp.delete_courier(courier_id)
-
-    @allure.title('Проверка, что запрос возвращает правильный код ответа')
-    def test_new_courier_created_with_correct_status(self):
-        new_courier_data = TestData.generate_new_courier_data(self)
-        new_courier = APIHelp.create_courier(new_courier_data)
-        assert new_courier.status_code == 201
-        with allure.step("Выводим на экран код ответа"):
-            print(new_courier.status_code)
-        courier_id = APIHelp.get_courier_id({"login": new_courier_data["login"], "password": new_courier_data["password"]})
-        APIHelp.delete_courier(courier_id)
-
-    @allure.title('Проверка, что успешный запрос возвращает "ok"')
-    def test_new_courier_created_with_correct_message(self):
-        new_courier_data = TestData.generate_new_courier_data(self)
-        new_courier = APIHelp.create_courier(new_courier_data)
         test_message = new_courier.text
         assert '{"ok":true}' in test_message
-        print(test_message)
         courier_id = APIHelp.get_courier_id({"login": new_courier_data["login"], "password": new_courier_data["password"]})
         APIHelp.delete_courier(courier_id)
 
@@ -40,8 +22,9 @@ class TestCourier:
         assert new_courier.status_code == 201
         new_courier_2 = APIHelp.create_courier(new_courier_data)
         assert new_courier_2.status_code == 409
-        with allure.step("Выводим на экран ответ при попытке создать курьера с такими же данными"):
-            print(new_courier_2.json().get('message'))
+        error_message = new_courier_2.json().get('message')
+        with allure.step("Сверяем ответ: Этот логин уже используется"):
+            assert "Этот логин уже используется" in error_message
         courier_id = APIHelp.get_courier_id({"login": new_courier_data["login"], "password": new_courier_data["password"]})
         APIHelp.delete_courier(courier_id)
 
