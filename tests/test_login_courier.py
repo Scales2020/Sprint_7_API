@@ -21,23 +21,15 @@ class TestloginCourier:
         APIHelp.delete_courier(courier_id)
 
 
-    @allure.title('Поверка, что курьер может авторизоваться')
+    @allure.title('Поверка, что курьер может авторизоваться и успешный запрос возвращает  id')
     def test_courier_login_success(self):
         APIHelp.create_courier(NewData.new_user_log)
         login_response = APIHelp.login_courier({"login": NewData.new_user_log["login"],"password": NewData.new_user_log["password"]})
         assert login_response.status_code == 200
-        print(login_response.status_code)
+        assert "id" in login_response.text
         courier_id = APIHelp.get_courier_id({"login": NewData.new_user_log["login"],"password": NewData.new_user_log["password"]})
         APIHelp.delete_courier(courier_id)
 
-    @allure.title('Проверка, что успешный запрос возвращает id')
-    def test_courier_login_returns_id(self):
-        APIHelp.create_courier(NewData.new_user_log)
-        login_response = APIHelp.login_courier({"login": NewData.new_user_log["login"], "password": NewData.new_user_log["password"]})
-        assert '"id":' in login_response.text
-        print(login_response.text)
-        courier_id = APIHelp.get_courier_id({"login": NewData.new_user_log["login"], "password": NewData.new_user_log["password"]})
-        APIHelp.delete_courier(courier_id)
 
     @allure.title('Проверка, что если авторизоваться под несуществующим пользователем, запрос возвращает ошибку')
     def test_not_existing_courier_login_return_error(self):
@@ -47,6 +39,7 @@ class TestloginCourier:
         APIHelp.delete_courier(courier_id)
         login_response = APIHelp.login_courier({"login": NewData.new_user_log["login"], "password": NewData.new_user_log["password"]})
         assert login_response.status_code == 404
+        assert 'Учетная запись не найдена' in login_response.text
         with allure.step('Ответ на попытку авторизоваться под несуществующим(удаленным) пользователем:'):
             print(login_response.text)
 
@@ -57,7 +50,7 @@ class TestloginCourier:
         courier_id = APIHelp.get_courier_id({"login": NewData.new_user_log["login"], "password": NewData.new_user_log["password"]})
         login_response = APIHelp.login_courier({"login": "", "password": NewData.new_user_log["password"]})
         assert login_response.status_code == 400
-        print(login_response.status_code)
+        assert "Недостаточно данных для входа" in login_response.text
         APIHelp.delete_courier(courier_id)
 
     @allure.title('Проверка, что система вернёт ошибку, если неправильно указать логин или пароль')
@@ -66,7 +59,7 @@ class TestloginCourier:
         courier_id = APIHelp.get_courier_id({"login": NewData.new_user_log["login"], "password": NewData.new_user_log["password"]})
         login_response = APIHelp.login_courier({"login": "Murmur", "password": NewData.new_user_log["password"]})
         assert login_response.status_code == 404
-        print(f'Некорректный логин или пароль, ошибка {login_response.status_code}')
+        assert "Учетная запись не найдена" in login_response.text
         APIHelp.delete_courier(courier_id)
 
 

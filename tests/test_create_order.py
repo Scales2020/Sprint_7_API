@@ -28,6 +28,6 @@ class TestOrder:
         with allure.step(f'Полные данные для заказа {order_data}'):
             assert response.status_code == 201
         with allure.step(f'Тело ответа содержит track - {response.text}'):
-            print(response.text)
+            assert "track" in response.text
 
 
